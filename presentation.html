@@ -182,16 +182,14 @@ Employee name:
 .right-column[
 Javascript code that populates the view and reacts to changes in it.
 ```javascript
-function myCtrl( $scope ) {
-  $scope = {
-     employeeName: "Mattias",
-     company: "Net Insight AB"
-  };
+angular.module('myApp', [])
+  .controller('MyControl', function() {
+    this.name = "Hello";
+    this.Click = function(){
+      alert("Hello World");
+    }
 
-  $scope.save_info = function() {
-        console.log( $scope.employeeName );
-  };
-}
+  });
 ```
 ]
 
@@ -207,12 +205,14 @@ name: example1
 ## Controller populates Model
 
 ```javascript
-function MyCtrl( $scope ) {
-    $scope.name = "World";
-    $scope.Click = function() {
-        alert( "Hello " + $scope.name );
+angular.module('myApp', [])
+  .controller('MyControl', function() {
+    this.name = "Hello";
+    this.Click = function(){
+      alert("Hello World");
     }
-}
+
+});
 ```
 
 ---
@@ -220,29 +220,24 @@ function MyCtrl( $scope ) {
 ## View
 
 ```html
-<html ng-app>
+<!DOCTYPE HTML>
+<html ng-app="myApp">
 <head>
-  <link rel="stylesheet"
-    href="../bower_components/foundation/css/foundation.min.css">
-  <script src="../bower_components/angular/angular.min.js"></script>
-  <script src="ex1.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs
+    /angularjs/1.7.9/angular.min.js"></script>
+    <script src="index.js"></script>
 </head>
-
-<body ng-controller="MyCtrl">
-
-<div class="row">
-  <h1>{{name}}</h1>
-  <input type="text" ng-model="name">
-  <button ng-click="Click()">Click me</button>
+<body>
+<div class="row" ng-controller="MyControl as c">
+    <h1>{{c.name}}</h1>
+    <button ng-click="c.Click()">Click Here</button>
 </div>
-
 </body>
-
 </html>
 ```
 
 
-<a href="ex1/index.html" target="_blank">Result</a>
+<!-- <a href="ex1/index.html" target="_blank">Result</a> -->
 
 ---
 template: inverse
@@ -276,16 +271,28 @@ get "http://api.icndb.com/jokes/random"
 # Controller
 
 ```javascript
-function MyCtrl( $scope, $http ) {
+angular.module('myApp', [])
+  .controller('MyControl', function($http) {
+    this.joke = "";
+    var jokectr = this;
+    this.Click = function(){
+      $http({
+            method: 'GET',
+            url: "http://api.icndb.com/jokes/random"
+      }).then(function successCallback(response) {
+          // this callback will be called asynchronously
+          // when the response is available
+          jokectr.joke = response.data.value.joke;
+          console.log(response);
+      }, function errorCallback(response) {
+          // called asynchronously if an error occurs
+          // or server returns response with an error status.
 
-    $scope.FetchJoke = function() {
-        $http.get( "http://api.icndb.com/jokes/random")
-        .then( function(response) {
-            $scope.data = response.data;
-        });
-    }
+          console.log(response);
 
-}
+      });
+  }
+});
 
 ```
 
@@ -294,12 +301,22 @@ function MyCtrl( $scope, $http ) {
 # Template
 
 ```html
-<body ng-controller="MyCtrl">
-<div class="row">
-    <h1>Joke {{data.value.id}}</h1>
-    <p>{{data.value.joke}}</p>
-    <button ng-click="FetchJoke()">Fetch joke</button>
+<!DOCTYPE HTML>
+<html ng-app="myApp">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs
+    /angularjs/1.7.9/angular.min.js"></script>
+    <script src="index.js"></script>
+</head>
+<body>
+<div class="row" ng-controller="MyControl as c">
+    <h2>Joke will load here</h2>
+    <h3>{{c.joke}}</h3>
+
+    <button ng-click="c.Click()">Click Here</button>
 </div>
+</body>
+</html>
 ```
 
 <a href="ex2/index.html" target="_blank">Result</a>
@@ -338,16 +355,28 @@ get http://api.icndb.com/jokes/random/3
 ## Controller
 
 ```javascript
-function MyCtrl( $scope, $http ) {
+angular.module('myApp', [])
+  .controller('MyControl', function($http) {
+    this.joke = "";
+    var jokectr = this;
+    this.Click = function(){
+      $http({
+            method: 'GET',
+            url: "http://api.icndb.com/jokes/random/3"
+      }).then(function successCallback(response) {
+          // this callback will be called asynchronously
+          // when the response is available
+          jokectr.joke = response.data.value.joke;
+          console.log(response);
+      }, function errorCallback(response) {
+          // called asynchronously if an error occurs
+          // or server returns response with an error status.
 
-  $scope.FetchJokes = function() {
-    $http.get( "http://api.icndb.com/jokes/random/3")
-    .then( function(response) {
-      $scope.data = response.data;
-    });
+          console.log(response);
+
+      });
   }
-
-}
+});
 ```
 
 ---
@@ -373,12 +402,6 @@ function MyCtrl( $scope, $http ) {
 
 ---
 
-template: inverse
-
-# Example 4
-# Showing stuff conditionally
-
----
 template: inverse
 
 # Custom directives
@@ -415,80 +438,6 @@ Entire application on one page but the url changes
 ```html
 <div ng-view></div>
 ```
-
-*Separation of concerns*
-
----
-template: inverse
-
-# Services
-
-Separate different parts of the codebase from each other using services
-
-*Separation of concerns*
-
----
-
-template: inverse
-
-# Testability
-
-Uses Dependency injection
-
-Includes mocks for core services
-
----
-
-template: inverse
-
-# Real world test
-
----
-
-## IP Interfaces Request
-
-```
-POST /data/oam
-```
-
-```javascript
-[
-  {
-    "root":    "ipconf.if.*",
-    "entries": "name address.0.inet? address.0.netmask? " +
-               "media.active media.current mtu"
-  }
-]
-```
----
-
-## IP Interfaces Response
-
-
-```javascript
-{
-"_success": true,
-"_errors": [],
-  "ipconf": {
-    "if": {
-      "0": {
-        "name": "eth-aux",
-        "address": {},
-        "media": {
-          "active": "link down",
-          "current": "autoselect"
-        },
-        "mtu": "1500"
-      },
-      "1": { ... }
-    }
-  }
-}
-```
-
-.panel[
-Response built by node **without understanding the contents of oam**
-]
 
 ---
 
